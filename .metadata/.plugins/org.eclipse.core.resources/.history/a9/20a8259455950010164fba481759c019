@@ -1,0 +1,97 @@
+package libranet;
+import java.time.LocalDate;
+import java.util.Scanner;
+public class Main {
+    public static void main(String[] args) {
+        Library library = new Library(10.0); // fine = Rs. 10/day
+        Scanner sc = new Scanner(System.in);
+
+        // Add some default items
+        library.addItem(new Book(1, "Java Fundamentals", "James Gosling", 500));
+        library.addItem(new Audiobook(2, "Clean Code (Audio)", "Robert Martin", 600));
+        library.addItem(new EMagazine(3, "Tech Today", "TechPress", 42));
+
+        while (true) {
+            System.out.println("\n===== LibraNet Menu =====");
+            System.out.println("1. Borrow Item");
+            System.out.println("2. Return Item");
+            System.out.println("3. Search by Type");
+            System.out.println("4. Show User Fines");
+            System.out.println("5. Exit");
+            System.out.print("Choose an option: ");
+
+            int choice = sc.nextInt();
+            sc.nextLine(); // consume newline
+
+            switch (choice) {
+                case 1 -> {
+                    System.out.print("Enter Item ID: ");
+                    int itemId = sc.nextInt();
+                    System.out.print("Enter User ID: ");
+                    int userId = sc.nextInt();
+                    sc.nextLine(); // consume newline
+                    System.out.print("Enter duration (e.g., 5d, 2w): ");
+                    String duration = sc.nextLine();
+
+                    try {
+                        library.borrowItem(itemId, userId, duration);
+                        System.out.println("Item borrowed successfully!");
+                    } catch (Exception e) {
+                        System.out.println("Error: " + e.getMessage());
+                    }
+                }
+
+                case 2 -> {
+                    System.out.print("Enter Item ID: ");
+                    int itemId = sc.nextInt();
+                    System.out.print("Enter User ID: ");
+                    int userId = sc.nextInt();
+                    System.out.print("Enter days after borrowing for return: ");
+                    int days = sc.nextInt();
+
+                    LocalDate returnDate = LocalDate.now().plusDays(days);
+                    try {
+                        library.returnItem(itemId, userId, returnDate);
+                        System.out.println("Item returned successfully!");
+                    } catch (Exception e) {
+                        System.out.println("Error: " + e.getMessage());
+                    }
+                }
+
+                case 3 -> {
+                    System.out.println("Search Type Options: 1=Book, 2=Audiobook, 3=E-Magazine");
+                    int typeChoice = sc.nextInt();
+
+                    Class<?> type = switch (typeChoice) {
+                        case 1 -> Book.class;
+                        case 2 -> Audiobook.class;
+                        case 3 -> EMagazine.class;
+                        default -> null;
+                    };
+
+                    if (type != null) {
+                        library.searchByType(type).forEach(it ->
+                                System.out.println(it.getId() + ": " + it.getTitle() + " by " + it.getAuthor()));
+                    } else {
+                        System.out.println("Invalid type choice.");
+                    }
+                }
+
+                case 4 -> {
+                    System.out.print("Enter User ID: ");
+                    int userId = sc.nextInt();
+                    double fine = library.getTotalFineForUser(userId);
+                    System.out.println("Total fine for user " + userId + ": Rs." + fine);
+                }
+
+                case 5 -> {
+                    System.out.println("Exiting LibraNet. Goodbye!");
+                    sc.close();
+                    return; // exits the loop and program
+                }
+
+                default -> System.out.println("Invalid choice, try again.");
+            }
+        }
+    }
+}
